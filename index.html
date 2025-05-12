@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllGigabaytes</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      text-align: center;
+    }
+
+    .modal, .form-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content, .form-content {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn-ok {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .operadoras {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .btn-operadora {
+      flex: 1 1 40%;
+      max-width: 150px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .vodacom { background-color: #e60000; }
+    .movitel { background-color: #ff8c00; }
+    .mcel { background-color: #007bff; }
+    .streaming { background-color: white; }
+
+    .pacotes {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .cartao-pacote {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .cartao-pacote img {
+      width: 40px;
+      height: auto;
+      margin-bottom: 10px;
+    }
+
+    .cartao-pacote h4 {
+      margin: 5px 0;
+      color: #e60000;
+    }
+
+    .cartao-pacote p {
+      font-size: 14px;
+      color: #666;
+      margin: 5px 0;
+    }
+
+    .cartao-pacote button {
+      margin-top: 10px;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-voltar {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="modal" id="avisoModal">
+  <div class="modal-content">
+    <h3>AVISO IMPORTANTE</h3>
+    <p>Todos os nossos pacotes têm validade de 30 dias. Ao adquirir um pacote de 20GB ou superior, você garante um bônus exclusivo de 4GB na sua primeira compra.</p>
+    <p>O pagamento é processado automaticamente via M-Pesa e E-Mola.</p>
+    <p>Utilize apenas canais oficiais e verifique os valores.</p>
+    <button class="btn-ok" onclick="fecharAviso()">Compreendi</button>
+  </div>
+</div>
+
+<div class="form-modal" id="formModal" style="display:none;">
+  <div class="form-content">
+    <h3>Finalizar Pedido</h3>
+    <form id="formularioPedido">
+      <p>Pacote Selecionado: <strong id="pacoteSelecionadoTexto"></strong></p>
+      <input type="text" id="nome" placeholder="Nome do comprador" required />
+      <select id="metodoPagamento" required>
+        <option value="">Escolha o método de pagamento</option>
+        <option value="mpesa">M-Pesa</option>
+        <option value="emola">E-Mola</option>
+      </select>
+      <input type="text" id="numero" placeholder="Número para receber o pacote" required />
+      <input type="text" id="telefone" placeholder="Seu número M-Pesa/E-Mola" required />
+      <button type="submit" class="btn-ok">Enviar Pedido</button>
+    </form>
+    <button class="btn-voltar" onclick="voltarParaPacotes()">Voltar</button>
+  </div>
+</div>
+
+<div class="container" id="conteudo" style="display:none;">
+  <h2>Selecione a Operadora</h2>
+  <div class="operadoras">
+    <button class="btn-operadora vodacom" onclick="mostrarPacotes('vodacom')">Vodacom</button>
+    <button class="btn-operadora movitel" onclick="mostrarPacotes('movitel')">Movitel</button>
+    <button class="btn-operadora mcel" onclick="mostrarPacotes('mcel')">Mcel</button>
+    <button class="btn-operadora streaming" onclick="mostrarPacotes('streaming')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" width="20" />
+      <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" width="20" />
+    </button>
+  </div>
+  <div class="pacotes" id="pacotes"></div>
+  <button class="btn-voltar" style="display:none;" id="voltarBtn" onclick="voltarParaOperadoras()">Voltar</button>
+</div>
+  <!-- Botão flutuante de suporte via WhatsApp -->
+  <a href="https://wa.me/+258860872300" target="_blank" class="whatsapp-float">
+    <img src="wa1.png" alt="Suporte via WhatsApp" />
+  </a>
+<script>
+  let pacoteSelecionado = '';
+  let corAtual = '';
+
+  const pacotesData = {
+    vodacom: ['10GB - 110MT', '20GB - 220MT', '30GB - 330MT', '40GB - 440MT', '50GB - 550MT', '60GB - 660MT', '70GB - 770MT', '80GB - 880MT', '90GB - 990MT', '100GB - 1100MT', 'ILIMITADO VODACOM - 380MT'],
+    movitel: ['10GB - 120MT', '20GB - 220MT', '30GB - 360MT', '40GB - 480MT', '50GB - 600MT', '60GB - 720MT', '80GB - 960MT', '100GB  - 1200MT', 'ILIMITADO MOVITEL - 350MT'],
+    mcel: ['10GB - 108MT', '20GB - 216MT', '30GB - 320MT', '40GB - 430MT', '50GB - 550MT', '60GB - 660MT', '80GB - 880MT', '100GB - 1010MT', 'ILIMITADO MCEL - 360MT'],
+    streaming: ['Netflix - 1 Mês - 250MT', 'Spotify - 1 Mês - 160MT']
+  };
+
+  const logos = {
+    vodacom: 'https://upload.wikimedia.org/wikipedia/commons/f/f8/Vodacom-newlogo.svg',
+    movitel: 'https://upload.wikimedia.org/wikipedia/pt/2/2f/Movitel.png',
+    mcel: 'https://upload.wikimedia.org/wikipedia/commons/4/4a/Mo%C3%A7ambique_Celular_logo.png',
+    streaming: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/100px-Netflix_2015_logo.svg.png'
+  };
+
+  const cores = {
+    vodacom: '#e60000',
+    movitel: '#ff8c00',
+    mcel: '#007bff',
+    streaming: '#000'
+  };
+
+  function fecharAviso() {
+    const aviso = document.getElementById('avisoModal');
+    const conteudo = document.getElementById('conteudo');
+    if (aviso && conteudo) {
+      aviso.style.display = 'none';
+      conteudo.style.display = 'block';
+    }
+  }
+
+  function mostrarPacotes(tipo) {
+    const pacotesDiv = document.getElementById('pacotes');
+    pacotesDiv.innerHTML = '';
+    corAtual = cores[tipo];
+    pacoteSelecionado = '';
+    document.getElementById('voltarBtn').style.display = 'inline-block';
+
+    pacotesData[tipo].forEach(txt => {
+      const card = document.createElement('div');
+      card.className = 'cartao-pacote';
+      const logo = document.createElement('img');
+      logo.src = logos[tipo];
+      card.appendChild(logo);
+      const h4 = document.createElement('h4');
+      h4.innerText = txt;
+      card.appendChild(h4);
+      const p = document.createElement('p');
+      p.innerText = 'Válido por 30 dias';
+      card.appendChild(p);
+      const btn = document.createElement('button');
+      btn.innerText = 'Comprar';
+      btn.style.backgroundColor = corAtual;
+      btn.onclick = () => abrirFormulario(txt);
+      card.appendChild(btn);
+      pacotesDiv.appendChild(card);
+    });
+  }
+
+  function abrirFormulario(pacote) {
+    pacoteSelecionado = pacote;
+    document.getElementById('pacoteSelecionadoTexto').innerText = pacote;
+    document.getElementById('formModal').style.display = 'flex';
+    document.getElementById('conteudo').style.display = 'none';
+  }
+
+  function voltarParaOperadoras() {
+    document.getElementById('pacotes').innerHTML = '';
+    document.getElementById('voltarBtn').style.display = 'none';
+  }
+
+  function voltarParaPacotes() {
+    document.getElementById('formModal').style.display = 'none';
+    document.getElementById('conteudo').style.display = 'block';
+  }
+
+  document.getElementById("formularioPedido").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const nome = document.getElementById('nome').value;
+    const metodoPagamento = document.getElementById('metodoPagamento').value;
+    const numero = document.getElementById('numero').value;
+    const telefone = document.getElementById('telefone').value;
+
+    const valor = parseFloat(pacoteSelecionado.split('-').pop().replace('MT', '').trim());
+
+    const payload = {
+      carteira: '1744544201063x698716811800084500',
+      numero: telefone,
+      "quem comprou": nome,
+      valor: valor
+    };
+
+    let endpoint = metodoPagamento === 'emola'
+      ? 'https://mozpayment.co.mz/api/1.1/wf/pagamentorotativoemola'
+      : 'https://mozpayment.co.mz/api/1.1/wf/pagamentorotativompesa';
+
+    fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(res => res.json())
+      .then(() => {
+        alert('Pedido enviado com sucesso!');
+        document.getElementById('formModal').style.display = 'none';
+        document.getElementById('conteudo').style.display = 'block';
+      }).catch(error => {
+        console.error('Erro no pagamento:', error);
+        alert('Erro no pagamento. Tente novamente.');
+      });
+  });
+</script>
+
+</body>
+</html>
